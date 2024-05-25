@@ -7,47 +7,50 @@ import korlibs.korge.input.*
 import korlibs.korge.scene.*
 import korlibs.korge.time.*
 import korlibs.korge.view.*
+import korlibs.korge.view.collision.*
+import korlibs.logger.Console.trace
 import korlibs.math.geom.*
 import korlibs.math.geom.slice.*
 import korlibs.math.random.*
 import korlibs.time.*
 import kotlin.random.*
 
+suspend fun main() = Korge(title = "Alien Blaster",
+    windowSize = Size(1000, 1000), virtualSize = Size(640, 480),
+    backgroundColor = Colors.BLACK) {
 
-suspend fun main() = Korge(windowSize = Size(1000, 1000), virtualSize = Size(640, 480), backgroundColor = Colors["#2b2b2b"]) {
-    val sceneContainer = sceneContainer()
-    val circle = circle(100.0, Colors.GREEN).xy((width / 2) - 100, (height / 2) - 100)
-    val rect = solidRect(100.0, 100.0, Colors.GOLD).xy(100, 125)
+    val backgroundImage = resourcesVfs["space_bcg.png"].readBitmap()
 
-    val bitmap = resourcesVfs["alien_icon.png"].readBitmap()
-    val image = image(bitmap).scale(3).xy(100, 80).apply {
-        rotation =  Angle.fromDegrees( rotation.degrees + 1)}
+    val mainContainer = Container().addTo(this)
 
-    val animationexp = SpriteAnimation(
-        resourcesVfs["gfx/exp2.jpg"].readBitmapSlice().splitInRows(64, 64),
-        60.milliseconds
-    )
+    val backgroundSprite = Sprite(backgroundImage).apply {
+        xy(0, 0)
+        width = views.virtualWidth.toDouble()
+        height = views.virtualHeight.toDouble()
+    }
+    mainContainer.addChild(backgroundSprite)
 
+    //val sceneContainer = sceneContainer()
+    val circle3 = circle(80.0, Colors["#1157ff"]).xy((width / 2) - 80, (height / 2) - 80)
+    val circle2 = circle(70.0, Colors["#5fc3ff"]).xy((width / 2) - 70, (height / 2) - 70)
+    val circle1 = circle(60.0, Colors["#1157ff"]).xy((width / 2) - 60, (height / 2) - 60)
+    val center = circle(50.0, Colors.BLACK).xy((width / 2) - 50, (height / 2) - 50 )
 
-    val randomexp = Random(0L)
-    interval(0.02.seconds) {
-        sprite(animationexp).xy(randomexp[0, 640], randomexp[0, 480]).also { it.blendMode = BlendMode.SCREEN }
-            .also { sprite -> sprite.onAnimationCompleted { sprite.removeFromParent() } }
-            .playAnimation()
+    val image = resourcesVfs["alien_icon.png"].readBitmapSlice().splitInRows(64, 64)
+
+    interval(1.seconds) {
+        val edge = Random[0, 3]
+        if(edge == 0){
+            val circle12 = circle(40.0, Colors["#1157ff"]).xy(0, Random[0, 480])}
+        else if(edge == 1){
+            val circle12 = circle(40.0, Colors["#1157ff"]).xy(640, Random[0, 480])}
+        else if(edge == 2){
+            val circle12 = circle(40.0, Colors["#1157ff"]).xy(Random[0, 640], 480)}
+        else{
+            val circle12 = circle(40.0, Colors["#1157ff"]).xy(Random[0, 640], 0)}
     }
 
+    center.onCollision({it == image}){
+    trace("Collision detected!")
+}}
 
-    val sound = resourcesVfs["sfx/explodify.mp3"].readSound()
-    val animations = SpriteAnimation(
-        resourcesVfs["gfx/exp2.jpg"].readBitmapSlice().splitInRows(64, 64),
-        60.milliseconds
-    )
-
-    val randoms = Random(0L)
-    interval(.25.seconds) {
-        sound.playNoCancel(1.playbackTimes).also { it.volume = 0.3 }
-        sprite(animations).xy(randoms[0, 250], randoms[0, 250]).also { it.blendMode = BlendMode.SCREEN }
-            .also { sprite -> sprite.onAnimationCompleted { sprite.removeFromParent() } }
-            .playAnimation()
-    }
-}

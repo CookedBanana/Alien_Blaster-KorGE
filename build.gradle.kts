@@ -18,7 +18,7 @@ korge {
 	
 	targetJvm()
 	targetJs()
-    targetWasmJs()
+    targetWasm()
 	targetDesktop()
 	targetIos()
 	targetAndroid()
