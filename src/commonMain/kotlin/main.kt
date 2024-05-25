@@ -1,27 +1,29 @@
-import korlibs.audio.sound.*
+import kotlin.random.*
+import kotlin.time.Duration.Companion.seconds
+import kotlin.math.sqrt
 import korlibs.image.color.*
-import korlibs.image.format.*
-import korlibs.io.file.std.*
 import korlibs.korge.*
-import korlibs.korge.input.*
-import korlibs.korge.scene.*
-import korlibs.korge.time.*
 import korlibs.korge.view.*
+import korlibs.korge.time.*
+import korlibs.io.file.std.*
 import korlibs.korge.view.collision.*
+import korlibs.math.random.*
 import korlibs.logger.Console.trace
+import korlibs.image.format.*
 import korlibs.math.geom.*
 import korlibs.math.geom.slice.*
-import korlibs.math.random.*
 import korlibs.time.*
-import kotlin.random.*
+
+import AlienBlaster.*
 
 suspend fun main() = Korge(title = "Alien Blaster",
-    windowSize = Size(1000, 1000), virtualSize = Size(640, 480),
+    windowSize = Size(1000, 1440), virtualSize = Size(640, 480),
     backgroundColor = Colors.BLACK) {
 
-    val backgroundImage = resourcesVfs["space_bcg.png"].readBitmap()
-
     val mainContainer = Container().addTo(this)
+    val speed = 100.0  // Set your desired speed here
+
+    val backgroundImage = resourcesVfs["space_bcg.png"].readBitmap()
 
     val backgroundSprite = Sprite(backgroundImage).apply {
         xy(0, 0)
@@ -30,7 +32,6 @@ suspend fun main() = Korge(title = "Alien Blaster",
     }
     mainContainer.addChild(backgroundSprite)
 
-    //val sceneContainer = sceneContainer()
     val circle3 = circle(80.0, Colors["#1157ff"]).xy((width / 2) - 80, (height / 2) - 80)
     val circle2 = circle(70.0, Colors["#5fc3ff"]).xy((width / 2) - 70, (height / 2) - 70)
     val circle1 = circle(60.0, Colors["#1157ff"]).xy((width / 2) - 60, (height / 2) - 60)
@@ -39,18 +40,48 @@ suspend fun main() = Korge(title = "Alien Blaster",
     val image = resourcesVfs["alien_icon.png"].readBitmapSlice().splitInRows(64, 64)
 
     interval(1.seconds) {
-        val edge = Random[0, 3]
-        if(edge == 0){
-            val circle12 = circle(40.0, Colors["#1157ff"]).xy(0, Random[0, 480])}
-        else if(edge == 1){
-            val circle12 = circle(40.0, Colors["#1157ff"]).xy(640, Random[0, 480])}
-        else if(edge == 2){
-            val circle12 = circle(40.0, Colors["#1157ff"]).xy(Random[0, 640], 480)}
-        else{
-            val circle12 = circle(40.0, Colors["#1157ff"]).xy(Random[0, 640], 0)}
+        val edge = Random.nextInt(4)
+        val color = when(edge) {
+            0 -> Pink
+            1 -> Blue
+            2 -> Green
+            else -> Red
+        }
+        val circle12 = circle(40.0, color)
+        when (edge) {
+            0 -> {
+                circle12.xy(Random.nextInt(640), 0).addTo(mainContainer)
+                trace("Summon up")
+            }
+            1 -> {
+                circle12.xy(Random.nextInt(640), 480).addTo(mainContainer)
+                trace("Summon down")
+            }
+            2 -> {
+                circle12.xy(0, Random.nextInt(480)).addTo(mainContainer)
+                trace("Summon left")
+            }
+            else -> {
+                circle12.xy(640, Random.nextInt(480)).addTo(mainContainer)
+                trace("Summon right")
+            }
+        }
+
+        circle12.addUpdater { dt ->
+            val dx = (center.x - x)
+            val dy = (center.y - y)
+            val distance = sqrt(dx * dx + dy * dy)
+            if (distance < speed * dt.seconds) {
+                removeFromParent()  // Remove the circle when it reaches the center
+            } else {
+                val unitDx = dx / distance
+                val unitDy = dy / distance
+                xy(x + unitDx * speed * dt.seconds, y + unitDy * speed * dt.seconds)
+            }
+        }
     }
 
     center.onCollision({it == image}){
-    trace("Collision detected!")
-}}
-
+        trace("Collision detected!")
+    }
+}
