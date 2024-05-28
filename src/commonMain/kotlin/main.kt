@@ -9,10 +9,16 @@ import korlibs.io.file.std.*
 import korlibs.korge.view.collision.*
 import korlibs.logger.Console.trace
 import korlibs.image.format.*
+import korlibs.korge.input.*
+import korlibs.korge.view.Circle
+import korlibs.korge.view.align.*
+import korlibs.korge.view.onClick
 import korlibs.math.geom.*
 import korlibs.math.geom.slice.*
 import korlibs.math.geom.vector.*
 import korlibs.time.*
+import alienBlaster.interaction.*
+import alienBlaster.effects.playKaboom
 
 suspend fun main() = Korge(title = "Alien Blaster",
     windowSize = Size(1000, 1440), virtualSize = Size(640, 480),
@@ -31,7 +37,7 @@ suspend fun main() = Korge(title = "Alien Blaster",
     mainContainer.addChild(backgroundSprite)
 
     val center = resourcesVfs["Area1/Center.png"].readBitmap()
-    val rings1 = resourcesVfs["Area1/Rings1.png"].readBitmap()
+    //val rings1 = resourcesVfs["Area1/Rings1.png"].readBitmap()
     val rings2 = resourcesVfs["Area1/Rings2.png"].readBitmap()
 
     val centerImg = image(center).xy((width / 2) - 45, (height / 2) - 45).apply {
@@ -41,16 +47,19 @@ suspend fun main() = Korge(title = "Alien Blaster",
     val rings2Img = image(rings2).xy((width / 2) - 125.0, (height / 2) - 125.0).apply {
         size(250.0, 250.0)}
 
-   /* val circle3 = circle(90.0, lightBlue).xy((width / 2) - 90, (height / 2) - 90)
-    val circle2 = circle(70.0, Blue).xy((width / 2) - 70, (height / 2) - 70)
-    val circle1 = circle(50.0, lightBlue).xy((width / 2) - 50, (height / 2) - 50)
 
-    val center = circle(30.0, Colors.BLACK).xy((width / 2) - 30, (height / 2) - 30 )*/
+    val ringHitbox1 = Circle(135, Colors.GOLD).xy((width / 2) - 135, (height / 2) - 135).addTo(mainContainer)
+    val ringHitbox2 = Circle(80, Colors.GREEN).xy((width / 2) - 80, (height / 2) - 80).addTo(mainContainer)
+
+    // Create a list to store all enemies
+    val enemies = mutableListOf<BasicAlien>()
 
     interval(1.seconds) {
         val edge = Random.nextInt(4)
-        val enemy = BasicAlien(alienImage, centerImg)
+        val enemy = BasicAlien(views, alienImage, centerImg)
         stage.addChild(enemy.basicAlienSprite)
+        enemies.add(enemy) // Add the new enemy to the list
+
         when (edge) {
             0 -> {
                 enemy.basicAlienSprite.xy(Random.nextInt(640), 0)
@@ -73,4 +82,23 @@ suspend fun main() = Korge(title = "Alien Blaster",
             }
         }
     }
+
+stage.onClick {
+    // Create a list to store enemies to be removed
+    val enemiesToRemove = mutableListOf<BasicAlien>()
+
+    // Check each enemy for a collision
+    for (enemy in enemies) {
+        if (enemy.basicAlienSprite.pos.isInRing((ringHitbox1.radius),
+                (ringHitbox2.radius), Point(width / 2, height / 2))) {
+            enemy.basicAlienSprite.removeFromParent()
+            enemiesToRemove.add(enemy) // Add the enemy to the removal list
+        }
+    }
+
+    // Remove the enemies from the main list
+    enemies.removeAll(enemiesToRemove)
+}
+
+
 }

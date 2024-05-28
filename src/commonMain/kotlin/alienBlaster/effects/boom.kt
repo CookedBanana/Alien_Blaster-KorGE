@@ -3,12 +3,13 @@ package alienBlaster.effects
 import korlibs.audio.sound.*
 import korlibs.image.format.*
 import korlibs.io.file.std.*
-import korlibs.korge.*
+import korlibs.korge.view.Views
 import korlibs.korge.view.*
 import korlibs.math.geom.slice.*
 import kotlin.time.Duration.Companion.milliseconds
 
-suspend fun playKaboom(x: Double, y: Double) = Korge {
+suspend fun playKaboom(views: Views, x: Double, y: Double) {
+
     val animationexp = SpriteAnimation(
         resourcesVfs["gfx/exp2.jpg"].readBitmapSlice().splitInRows(64, 64),
         60.milliseconds
@@ -16,12 +17,12 @@ suspend fun playKaboom(x: Double, y: Double) = Korge {
 
     val sound = resourcesVfs["sfx/explodify.mp3"].readSound()
 
-    val sprite = sprite(animationexp) {
+    val sprite = views.stage.sprite(animationexp) {
         position(x, y)
-        scale = 2.0
+        scale(0.5)
     }
 
-    sprite.playAnimationLooped(animationexp)
+    sprite.playAnimation(animationexp)
 
-    sound.play()
+    sound.playNoCancel(1.playbackTimes).also { it.volume = 0.7 }
 }
