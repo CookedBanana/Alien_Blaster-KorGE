@@ -92,6 +92,7 @@ stage.onClick {
         if (enemy.basicAlienSprite.pos.isInRing((ringHitbox1.radius),
                 (ringHitbox2.radius), Point(width / 2, height / 2))) {
             enemy.basicAlienSprite.removeFromParent()
+            playKaboom(views, enemy.x, enemy.y)
             enemiesToRemove.add(enemy) // Add the enemy to the removal list
         }
     }
@@ -99,6 +100,4 @@ stage.onClick {
     // Remove the enemies from the main list
     enemies.removeAll(enemiesToRemove)
 }
-
-
 }
