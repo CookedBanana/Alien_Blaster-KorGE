@@ -31,7 +31,10 @@ suspend fun main() = Korge(title = "Alien Blaster",
         color = Colors.WHITE
     }.addTo(mainContainer)
 
-    val explanationText = text("") {
+    val explanationText = text(
+        "       Klikaj w ekran, gdy kosmita znajduje się nw niebieskim pierścieniu\n" +
+        "Klikanie, gdy nie ma żadnego kosmity w pierścieniu powoduje utratę punktów\n" +
+        "                       Nie pozwól na dotarcie kosmitów do planety\n") {
         position(views.virtualWidth / 2 - width / 2, views.virtualHeight / 2 - 30)
         color = Colors.WHITE
     }.addTo(mainContainer)
