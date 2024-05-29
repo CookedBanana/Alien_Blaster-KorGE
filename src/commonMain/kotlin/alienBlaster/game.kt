@@ -1,8 +1,8 @@
 package alienBlaster
 
 import BasicAlien
-import alienBlaster.effects.*
 import alienBlaster.interaction.*
+import korlibs.audio.sound.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.io.file.std.*
@@ -10,12 +10,14 @@ import korlibs.korge.input.*
 import korlibs.korge.time.*
 import korlibs.korge.view.*
 import korlibs.korge.view.Circle
-import korlibs.logger.Console.trace
+import korlibs.korge.view.collision.*
 import korlibs.math.geom.*
 import kotlin.random.*
 import kotlin.time.Duration.Companion.seconds
 
 suspend fun game(mainContainer: Container, width: Double, height: Double, views: Views, stage: Stage) {
+
+    val sound = resourcesVfs["sfx/explodify.mp3"].readSound()
 
     val alienImage = resourcesVfs["AlienSprites/alien_basic.png"].readBitmap()
 
@@ -33,11 +35,12 @@ suspend fun game(mainContainer: Container, width: Double, height: Double, views:
     var counter = 0
 
     val counterText = stage.text("Pokonania: $counter") {
-        position(views.virtualWidth - 100, 20) // Adjust these values to position the counter
+        position(views.virtualWidth - 100, 20)
         color = Colors.WHITE
     }
 
     val enemies = mutableListOf<BasicAlien>()
+    val collidedEnemies = mutableSetOf<BasicAlien>()
 
     stage.interval(1.seconds) {
         val edge = Random.nextInt(4)
@@ -48,40 +51,57 @@ suspend fun game(mainContainer: Container, width: Double, height: Double, views:
         when (edge) {
             0 -> {
                 enemy.basicAlienSprite.xy(Random.nextInt(640), 0)
-                trace("Summon up")
             }
 
             1 -> {
                 enemy.basicAlienSprite.xy(Random.nextInt(640), 480)
-                trace("Summon down")
             }
 
             2 -> {
                 enemy.basicAlienSprite.xy(0, Random.nextInt(480))
-                trace("Summon left")
             }
 
             else -> {
                 enemy.basicAlienSprite.xy(640, Random.nextInt(480))
-                trace("Summon right")
             }
         }
     }
 
-    stage.onClick {
+    fun checkCenterCollisions() {
+        for (enemy in enemies) {
+            if (enemy.basicAlienSprite.collidesWith(centerImg) && enemy !in collidedEnemies) {
+                counter--
+                counterText.text = "Pokonania: $counter"
+                collidedEnemies.add(enemy)
+            }
+        }
+    }
+
+    fun checkRingCollisions() {
         val enemiesToRemove = mutableListOf<BasicAlien>()
 
         for (enemy in enemies) {
             if (enemy.basicAlienSprite.pos.isInRing((ringHitbox1.radius),
                     (ringHitbox2.radius), Point(width / 2, height / 2))) {
                 enemy.basicAlienSprite.removeFromParent()
-                playKaboom(views, enemy.x, enemy.y)
-                counter++
-                counterText.text = "Pokonania: $counter"
+                sound.playNoCancel(1.playbackTimes).also { it.volume = 0.2 }
                 enemiesToRemove.add(enemy)
             }
         }
 
-        enemies.removeAll(enemiesToRemove)
+        if (enemiesToRemove.isNotEmpty()) {
+            enemies.removeAll(enemiesToRemove)
+            counter += enemiesToRemove.size
+            counterText.text = "Pokonania: $counter"
+        } else{
+            counter--
+            counterText.text = "Pokonania: $counter"
+        }
+    }
+
+    stage.addUpdater { checkCenterCollisions() }
+
+    stage.onClick {
+        checkRingCollisions()
     }
 }

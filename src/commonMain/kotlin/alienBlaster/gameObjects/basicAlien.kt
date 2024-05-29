@@ -1,7 +1,6 @@
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import korlibs.image.bitmap.*
-import korlibs.logger.Console.trace
 import kotlin.math.*
 import korlibs.korge.view.*
 import korlibs.korge.view.collision.*
@@ -12,8 +11,8 @@ class BasicAlien(val views: Views, image: Bitmap, val centerImg: Image) :
 
     val spd = 100.0
 
-    val basicAlienSprite = Sprite(image).apply { // Use the image passed to the constructor
-        size(30.0, 30.0) // Set the size of the sprite
+    val basicAlienSprite = Sprite(image).apply {
+        size(30.0, 30.0)
     }
 
     var x: Double = 0.0
@@ -34,7 +33,6 @@ class BasicAlien(val views: Views, image: Bitmap, val centerImg: Image) :
             y = basicAlienSprite.y
             basicAlienSprite.onCollision({ it == centerImg }) {
                 basicAlienSprite.removeFromParent()
-                trace("Collision detected!")
             }
         }
     }

@@ -9,7 +9,6 @@ import alienBlaster.game
 import korlibs.image.text.*
 import korlibs.korge.input.*
 import korlibs.korge.view.onClick
-import alienBlaster.game
 import korlibs.audio.sound.*
 import korlibs.io.async.*
 
@@ -18,7 +17,6 @@ suspend fun main() = Korge(title = "Alien Blaster",
     backgroundColor = Colors.BLACK) {
 
     val mainContainer = Container().addTo(this)
-
 
     val backgroundImage = resourcesVfs["space_bcg.png"].readBitmap()
 
@@ -29,6 +27,11 @@ suspend fun main() = Korge(title = "Alien Blaster",
     }.addTo(mainContainer)
 
     val titleText = text("Alien Blaster") {
+        position(views.virtualWidth / 2 - width / 2, views.virtualHeight / 2 - 100)
+        color = Colors.WHITE
+    }.addTo(mainContainer)
+
+    val explanationText = text("") {
         position(views.virtualWidth / 2 - width / 2, views.virtualHeight / 2 - 30)
         color = Colors.WHITE
     }.addTo(mainContainer)
