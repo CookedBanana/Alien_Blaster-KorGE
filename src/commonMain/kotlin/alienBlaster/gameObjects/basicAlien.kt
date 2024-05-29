@@ -30,8 +30,8 @@ class BasicAlien(val views: Views, image: Bitmap, val centerImg: Image) :
                 basicAlienSprite.x + unitDx * spd * dt.seconds,
                 basicAlienSprite.y + unitDy * spd * dt.seconds
             )
-            x = basicAlienSprite.x // Update x
-            y = basicAlienSprite.y // Update y
+            x = basicAlienSprite.x
+            y = basicAlienSprite.y
             basicAlienSprite.onCollision({ it == centerImg }) {
                 basicAlienSprite.removeFromParent()
                 trace("Collision detected!")
